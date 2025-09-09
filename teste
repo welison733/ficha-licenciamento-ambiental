@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Licenciamento Ambiental</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        input, select, textarea {
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            transition: all 0.2s;
+            background-color: #ffffff;
+            color: #1f2937;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4338ca;
+            box-shadow: 0 0 0 2px rgba(67, 56, 202, 0.25);
+        }
+        .btn-primary {
+            background-color: #4338ca;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #312e81;
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-custom th, .table-custom td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .table-custom th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .table-custom tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .status-option {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        input[type="radio"]:checked + .status-option {
+            border-color: #4338ca;
+            box-shadow: 0 0 0 2px rgba(67, 56, 202, 0.25);
+        }
+        .status-option:hover {
+            opacity: 0.8;
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            text-align: center;
+        }
+        .all-records-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 90;
+        }
+        .all-records-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 1200px;
+            width: 95%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+        }
+        .collapsible-header {
+            cursor: pointer;
+            padding: 0.5rem 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .collapsible-content {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+        .collapsible-content-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-alto, .status-perita {
+            background-color: #dc2626;
+            color: #ffffff;
+        }
+        .status-medio {
+            background-color: #f59e0b;
+            color: #ffffff;
+        }
+        .status-baixo {
+            background-color: #16a34a;
+            color: #ffffff;
+        }
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 110;
+            padding: 1rem 2rem;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        /* Dark Mode Styles */
+        body.dark {
+            background-color: #1f2937;
+            color: #e5e7eb;
+        }
+        body.dark .card {
+            background-color: #374151;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+        body.dark input, body.dark select, body.dark textarea {
+            background-color: #4b5563;
+            border-color: #6b7280;
+            color: #e5e7eb;
+        }
+        body.dark input:focus, body.dark select:focus, body.dark textarea:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+        }
+        body.dark .btn-secondary {
+            background-color: #4b5563;
+            color: #e5e7eb;
+        }
+        body.dark .btn-secondary:hover {
+            background-color: #6b7280;
+        }
+        body.dark .table-custom th {
+            background-color: #4b5563;
+            color: #e5e7eb;
+        }
+        body.dark .table-custom tr:nth-child(even) {
+            background-color: #4b5563;
+        }
+        body.dark .table-custom th, body.dark .table-custom td {
+            border-color: #4b5563;
+        }
+        body.dark .message-box, body.dark .all-records-content {
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+        body.dark .collapsible-header {
+            background-color: #4b5563;
+        }
+        body.dark .collapsible-content {
+            border-color: #4b5563;
+        }
+    </style>
+</head>
+<body class="p-8 md:p-12">
+    <div class="container mx-auto">
+        <div class="flex justify-end mb-4">
+            <button id="themeToggle" class="btn-secondary flex items-center space-x-2">
+                <svg id="sunIcon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="moonIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <span id="themeText">Modo Escuro</span>
+            </button>
+        </div>
+        <div class="card p-8">
+            <div class="flex items-center justify-between mb-8">
+                <h1 class="text-3xl font-bold text-indigo-700">Ficha Estratégica - Licenciamento Ambiental</h1>
+                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <span class="font-bold">ID do Usuário:</span>
+                    <span id="userId" class="font-mono bg-gray-100 px-2 py-1 rounded-md">Carregando...</span>
+                </div>
+            </div>
+            
+            <!-- Identificação -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-indigo-700">Identificação</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="empreendimento" class="block text-sm font-medium mb-1">Empreendimento:</label>
+                        <select id="empreendimento" class="w-full">
+                            <option value="">Selecione...</option>
+                            <option value="FIOL">FIOL</option>
+                            <option value="FICO">FICO</option>
+                            <option value="FNS">FNS</option>
+                            <option value="TLSA">TLSA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="responsavel" class="block text-sm font-medium mb-1">Responsável pelas informações:</label>
+                        <select id="responsavel" class="w-full">
+                            <option value="">Selecione...</option>
+                            <option value="Áian Valverde Batista">Áian Valverde Batista</option>
+                            <option value="Alexandre Silva Macedo">Alexandre Silva Macedo</option>
+                            <option value="Ana Carla Alves da Silva">Ana Carla Alves da Silva</option>
+                            <option value="André Leonardo Oening">André Leonardo Oening</option>
+                            <option value="André Moreira Ramos">André Moreira Ramos</option>
+                            <option value="André Soller">André Soller</option>
+                            <option value="Bruno Marques dos Santos Silva">Bruno Marques dos Santos Silva</option>
+                            <option value="Carolina Senhorinho Ramalho Pizetta">Carolina Senhorinho Ramalho Pizetta</option>
+                            <option value="Eliane Silva Correia">Eliane Silva Correia</option>
+                            <option value="Estela Dalpim Castellani">Estela Dalpim Castellani</option>
+                            <option value="Fernando Pereira da Silva">Fernando Pereira da Silva</option>
+                            <option value="Geraldo Magela Alves Neto">Geraldo Magela Alves Neto</option>
+                            <option value="Gustavo de Oliveira Lopes">Gustavo de Oliveira Lopes</option>
+                            <option value="Gustavo Vergílio de Paula">Gustavo Vergílio de Paula</option>
+                            <option value="Haroldo Rezende Diniz">Haroldo Rezende Diniz</option>
+                            <option value="Isaac Cesar Moreno de Araujo">Isaac Cesar Moreno de Araujo</option>
+                            <option value="Janildo dos Anjos Batista">Janildo dos Anjos Batista</option>
+                            <option value="Juliana Karina Pereira Silva">Juliana Karina Pereira Silva</option>
+                            <option value="Juliano Marques Alves">Juliano Marques Alves</option>
+                            <option value="Leandro Franco Pedroza">Leandro Franco Pedroza</option>
+                            <option value="Lucas Wilson Caixeta Soares">Lucas Wilson Caixeta Soares</option>
+                            <option value="Luiz Ferreira da Silva">Luiz Ferreira da Silva</option>
+                            <option value="Marçalo João Carqueijo Scarante">Marçalo João Carqueijo Scarante</option>
+                            <option value="Marcos Leal Rodrigues">Marcos Leal Rodrigues</option>
+                            <option value="Maria Silva Cunha">Maria Silva Cunha</option>
+                            <option value="Maria Carolina Correia Carvalho">Maria Carolina Correia Carvalho</option>
+                            <option value="Mônica Aparecida de Faria">Mônica Aparecida de Faria</option>
+                            <option value="Nathan Teixeira Sarmento">Nathan Teixeira Sarmento</option>
+                            <option value="Núbia Borges das Neves Mendes">Núbia Borges das Neves Mendes</option>
+                            <option value="Paulo Ricardo Maestrelo">Paulo Ricardo Maestrelo</option>
+                            <option value="Rodrigo Mello de Vasconcelos">Rodrigo Mello de Vasconcelos</option>
+                            <option value="Thaís Cavalcanti Dantas">Thaís Cavalcanti Dantas</option>
+                            <option value="Thiago Felipe Faria">Thiago Felipe Faria</option>
+                            <option value="Vanessa Neri de Souza">Vanessa Neri de Souza</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="dataPreenchimento" class="block text-sm font-medium mb-1">Data de preenchimento:</label>
+                        <input type="date" id="dataPreenchimento">
+                    </div>
+                    <div>
+                        <label for="dataAtualizacao" class="block text-sm font-medium mb-1">Data de atualização prevista:</label>
+                        <input type="date" id="dataAtualizacao">
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <label for="statusConsolidado" class="block text-sm font-medium mb-1">Status consolidado:</label>
+                    <textarea id="statusConsolidado" rows="3"></textarea>
+                </div>
+                <div class="mt-6">
+                    <label for="situacaoEstudos" class="block text-sm font-medium mb-1">Situação dos estudos (EIA/RIMA ou equivalentes):</label>
+                    <textarea id="situacaoEstudos" rows="3"></textarea>
+                </div>
+                <div class="mt-6">
+                    <label for="interacoesOrgao" class="block text-sm font-medium mb-1">Interações com o órgão licenciador:</label>
+                    <textarea id="interacoesOrgao" rows="3"></textarea>
+                </div>
+                <div class="mt-6">
+                    <label for="pendenciasTecnicas" class="block text-sm font-medium mb-1">Pendências técnicas:</label>
+                    <textarea id="pendenciasTecnicas" rows="3"></textarea>
+                </div>
+                <div class="mt-6">
+                    <label for="observacoesAdicionais" class="block text-sm font-medium mb-1">Observações adicionais:</label>
+                    <textarea id="observacoesAdicionais" rows="3"></textarea>
+                </div>
+            </section>
+
+            <!-- Riscos/Bloqueios e Encaminhamentos -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-indigo-700">Principais Riscos/Bloqueios e Encaminhamentos</h2>
+                <div class="overflow-x-auto">
+                    <table class="table-custom mb-4" id="riscosTable">
+                        <thead>
+                            <tr>
+                                <th>Risco/Bloqueio</th>
+                                <th>Probabilidade</th>
+                                <th>Impacto</th>
+                                <th>Encaminhamento</th>
+                                <th>Justificativa</th>
+                                <th>Responsável</th>
+                                <th>Prazo</th>
+                                <th>Execução</th>
+                                <th>Indicador de Sucesso</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Linhas serão adicionadas aqui via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <button id="addRiscoBtn" class="btn-secondary">+ Adicionar Risco</button>
+            </section>
+
+            <!-- Checklist de Criticidade -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-indigo-700">Checklist de Criticidade</h2>
+                <div class="overflow-x-auto">
+                    <table class="table-custom" id="criticidadeTable">
+                        <thead>
+                            <tr>
+                                <th>Criticidade</th>
+                                <th>Situação</th>
+                                <th>Observações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>EIA/RIMA ou estudo socioambiental com atraso significativo</td>
+                                <td>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-1" value="alto" class="hidden">
+                                            <div class="status-option bg-red-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-1" value="medio" class="hidden">
+                                            <div class="status-option bg-amber-500 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M12 2L2 22h20L12 2z" />
+                                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-1" value="baixo" class="hidden">
+                                            <div class="status-option bg-green-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" placeholder="Atraso de 90 dias na entrega"></td>
+                            </tr>
+                            <tr>
+                                <td>Pendência de manifestação de órgão licenciador com prazo crítico</td>
+                                <td>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-2" value="alto" class="hidden">
+                                            <div class="status-option bg-red-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-2" value="medio" class="hidden">
+                                            <div class="status-option bg-amber-500 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M12 2L2 22h20L12 2z" />
+                                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-2" value="baixo" class="hidden">
+                                            <div class="status-option bg-green-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text"></td>
+                            </tr>
+                            <tr>
+                                <td>Risco de indeferimento ou exigência de complementação de estudos.</td>
+                                <td>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-3" value="alto" class="hidden">
+                                            <div class="status-option bg-red-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-3" value="medio" class="hidden">
+                                            <div class="status-option bg-amber-500 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M12 2L2 22h20L12 2z" />
+                                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-3" value="baixo" class="hidden">
+                                            <div class="status-option bg-green-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text"></td>
+                            </tr>
+                            <tr>
+                                <td>Impacto de decisão judicial sobre o processo de LP.</td>
+                                <td>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-4" value="alto" class="hidden">
+                                            <div class="status-option bg-red-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-4" value="medio" class="hidden">
+                                            <div class="status-option bg-amber-500 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M12 2L2 22h20L12 2z" />
+                                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-4" value="baixo" class="hidden">
+                                            <div class="status-option bg-green-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text"></td>
+                            </tr>
+                            <tr>
+                                <td>Necessidade de articulação institucional de alto nível.</td>
+                                <td>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-5" value="alto" class="hidden">
+                                            <div class="status-option bg-red-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-5" value="medio" class="hidden">
+                                            <div class="status-option bg-amber-500 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M12 2L2 22h20L12 2z" />
+                                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="crit-5" value="baixo" class="hidden">
+                                            <div class="status-option bg-green-600 text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Decisões da Reunião -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-indigo-700">Decisões da Reunião</h2>
+                <div class="overflow-x-auto">
+                    <table class="table-custom mb-4" id="decisoesTable">
+                        <thead>
+                            <tr>
+                                <th>Decisão tomada</th>
+                                <th>Responsável</th>
+                                <th>Prazo</th>
+                                <th>Próxima Reunião</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Linhas serão adicionadas aqui via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <button id="addDecisaoBtn" class="btn-secondary">+ Adicionar Decisão</button>
+            </section>
+
+            <div class="flex justify-end space-x-4">
+                <button id="saveBtn" class="btn-primary">Salvar Ficha</button>
+                <button id="clearFormBtn" class="btn-primary bg-gray-500 hover:bg-gray-700">Limpar Formulário</button>
+                <button id="showAllRecordsBtn" class="btn-primary bg-gray-500 hover:bg-gray-700">Ver Todos os Cadastros</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensagens de Feedback -->
+    <div id="messageBox" class="hidden message-box">
+        <p id="messageText" class="text-lg font-medium mb-4"></p>
+        <button id="closeMessageBtn" class="btn-primary">OK</button>
+    </div>
+
+    <!-- Painel de Todos os Cadastros -->
+    <div id="allRecordsPanel" class="hidden all-records-panel">
+        <div class="all-records-content">
+            <h2 class="text-2xl font-bold mb-6">Todos os Cadastros</h2>
+            <div id="recordsList" class="space-y-6">
+                <!-- Registros serão inseridos aqui via JS -->
+            </div>
+            <button id="closeAllRecordsBtn" class="btn-secondary absolute top-4 right-4">&times;</button>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="hidden loading-indicator">
+        <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDoc, getDocs, doc, setDoc, deleteDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let userId = 'anon-user';
+        let currentDocId = null; // New variable to track the document being edited
+        const publicCollectionPath = `/artifacts/${appId}/public/data/fichas`;
+        
+        // UI Elements
+        const saveBtn = document.getElementById('saveBtn');
+        const clearFormBtn = document.getElementById('clearFormBtn');
+        const showAllRecordsBtn = document.getElementById('showAllRecordsBtn');
+        const allRecordsPanel = document.getElementById('allRecordsPanel');
+        const recordsList = document.getElementById('recordsList');
+        const closeAllRecordsBtn = document.getElementById('closeAllRecordsBtn');
+        const userIdSpan = document.getElementById('userId');
+        const addRiscoBtn = document.getElementById('addRiscoBtn');
+        const riscosTableBody = document.querySelector('#riscosTable tbody');
+        const addDecisaoBtn = document.getElementById('addDecisaoBtn');
+        const decisoesTableBody = document.querySelector('#decisoesTable tbody');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const closeMessageBtn = document.getElementById('closeMessageBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const formTitle = document.querySelector('.text-3xl.font-bold');
+
+        // Theme Toggle Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const themeText = document.getElementById('themeText');
+
+        // Dark Mode Logic
+        function applyTheme(isDark) {
+            document.body.classList.toggle('dark', isDark);
+            sunIcon.classList.toggle('hidden', !isDark);
+            moonIcon.classList.toggle('hidden', isDark);
+            themeText.textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+        }
+
+        const isDark = localStorage.getItem('theme') === 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('theme'));
+        applyTheme(isDark);
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.contains('dark');
+            const newTheme = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme === 'dark');
+        });
+
+        // Authentication and Firestore setup
+        async function setupAuthAndFirestore() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdSpan.textContent = userId;
+                        console.log("Usuário autenticado:", userId);
+                    } else {
+                        console.log("Usuário não autenticado.");
+                        userIdSpan.textContent = 'anon-user';
+                    }
+                });
+            } catch (error) {
+                console.error("Erro na autenticação:", error);
+            }
+        }
+
+        // Show a custom message box instead of alert()
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        closeMessageBtn.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        // Show/hide loading indicator
+        function showLoading() {
+            loadingIndicator.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            loadingIndicator.classList.add('hidden');
+        }
+
+        // Add a new row to the Riscos table
+        addRiscoBtn.addEventListener('click', () => {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><button class="btn-secondary delete-row">Remover</button></td>
+            `;
+            riscosTableBody.appendChild(newRow);
+        });
+
+        // Add a new row to the Decisões table
+        addDecisaoBtn.addEventListener('click', () => {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="date"></td>
+                <td><button class="btn-secondary delete-row">Remover</button></td>
+            `;
+            decisoesTableBody.appendChild(newRow);
+        });
+
+        // Event delegation for removing rows
+        document.body.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-row')) {
+                e.target.closest('tr').remove();
+            }
+        });
+
+        // Function to get all form data
+        function getFormData() {
+            const identificacao = {
+                empreendimento: document.getElementById('empreendimento').value,
+                responsavel: document.getElementById('responsavel').value,
+                dataPreenchimento: document.getElementById('dataPreenchimento').value,
+                dataAtualizacao: document.getElementById('dataAtualizacao').value,
+                statusConsolidado: document.getElementById('statusConsolidado').value,
+                situacaoEstudos: document.getElementById('situacaoEstudos').value,
+                interacoesOrgao: document.getElementById('interacoesOrgao').value,
+                pendenciasTecnicas: document.getElementById('pendenciasTecnicas').value,
+                observacoesAdicionais: document.getElementById('observacoesAdicionais').value
+            };
+
+            const riscos = Array.from(riscosTableBody.querySelectorAll('tr')).map(row => {
+                const inputs = Array.from(row.querySelectorAll('input'));
+                return inputs.map(input => input.value);
+            });
+            
+            const criticidade = Array.from(document.querySelectorAll('#criticidadeTable tbody tr')).map(row => {
+                const selectedRadio = row.querySelector('input[type="radio"]:checked');
+                const obs = row.querySelector('input[type="text"]');
+                return {
+                    criticidade: row.querySelector('td:first-child').textContent.trim(),
+                    situacao: selectedRadio ? selectedRadio.value : '',
+                    observacoes: obs.value
+                };
+            });
+
+            const decisoes = Array.from(decisoesTableBody.querySelectorAll('tr')).map(row => {
+                const inputs = Array.from(row.querySelectorAll('input'));
+                return {
+                    decisao: inputs[0].value,
+                    responsavel: inputs[1].value,
+                    prazo: inputs[2].value,
+                    proximaReuniao: inputs[3].value
+                };
+            });
+            
+            return {
+                identificacao,
+                riscos,
+                criticidade,
+                decisoes
+            };
+        }
+
+        // Function to set all form data
+        function loadFormData(data) {
+            if (!data) return;
+
+            // Clear the form and set a new document ID
+            clearForm();
+            currentDocId = data.docId;
+
+            // Identificação
+            if (data.identificacao) {
+                document.getElementById('empreendimento').value = data.identificacao.empreendimento || '';
+                document.getElementById('responsavel').value = data.identificacao.responsavel || '';
+                document.getElementById('dataPreenchimento').value = data.identificacao.dataPreenchimento || '';
+                document.getElementById('dataAtualizacao').value = data.identificacao.dataAtualizacao || '';
+                document.getElementById('statusConsolidado').value = data.identificacao.statusConsolidado || '';
+                document.getElementById('situacaoEstudos').value = data.identificacao.situacaoEstudos || '';
+                document.getElementById('interacoesOrgao').value = data.identificacao.interacoesOrgao || '';
+                document.getElementById('pendenciasTecnicas').value = data.identificacao.pendenciasTecnicas || '';
+                document.getElementById('observacoesAdicionais').value = data.identificacao.observacoesAdicionais || '';
+            }
+
+            // Riscos
+            riscosTableBody.innerHTML = '';
+            if (data.riscos && Array.isArray(data.riscos)) {
+                data.riscos.forEach(risco => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td><input type="text" value="${risco[0] || ''}"></td>
+                        <td><input type="text" value="${risco[1] || ''}"></td>
+                        <td><input type="text" value="${risco[2] || ''}"></td>
+                        <td><input type="text" value="${risco[3] || ''}"></td>
+                        <td><input type="text" value="${risco[4] || ''}"></td>
+                        <td><input type="text" value="${risco[5] || ''}"></td>
+                        <td><input type="text" value="${risco[6] || ''}"></td>
+                        <td><input type="text" value="${risco[7] || ''}"></td>
+                        <td><input type="text" value="${risco[8] || ''}"></td>
+                        <td><button class="btn-secondary delete-row">Remover</button></td>
+                    `;
+                    riscosTableBody.appendChild(newRow);
+                });
+            }
+            
+            // Criticidade
+            if (data.criticidade && Array.isArray(data.criticidade)) {
+                const rows = document.querySelectorAll('#criticidadeTable tbody tr');
+                data.criticidade.forEach((crit, index) => {
+                    if (rows[index]) {
+                        const radio = rows[index].querySelector(`input[value="${crit.situacao}"]`);
+                        if (radio) {
+                            radio.checked = true;
+                        }
+                        rows[index].querySelector('input[type="text"]').value = crit.observacoes || '';
+                    }
+                });
+            }
+
+            // Decisões
+            decisoesTableBody.innerHTML = '';
+            if (data.decisoes && Array.isArray(data.decisoes)) {
+                data.decisoes.forEach(decisao => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td><input type="text" value="${decisao.decisao || ''}"></td>
+                        <td><input type="text" value="${decisao.responsavel || ''}"></td>
+                        <td><input type="text" value="${decisao.prazo || ''}"></td>
+                        <td><input type="date" value="${decisao.proximaReuniao || ''}"></td>
+                        <td><button class="btn-secondary delete-row">Remover</button></td>
+                    `;
+                    decisoesTableBody.appendChild(newRow);
+                });
+            }
+            
+            formTitle.textContent = "Ficha Estratégica - Editando";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Save or update data to Firestore
+        saveBtn.addEventListener('click', async () => {
+            showLoading();
+            const formData = {
+                ...getFormData(),
+                userId: userId, // Add userId to the data
+                timestamp: new Date() // Add a timestamp
+            };
+            
+            try {
+                if (currentDocId) {
+                    const privateDocRef = doc(db, `/artifacts/${appId}/users/${userId}/fichas`, currentDocId);
+                    const publicDocRef = doc(db, publicCollectionPath, currentDocId);
+                    await setDoc(privateDocRef, formData, { merge: true });
+                    await setDoc(publicDocRef, formData, { merge: true });
+                    showMessage("Ficha atualizada com sucesso!");
+                    console.log("Documento atualizado com sucesso:", currentDocId);
+                } else {
+                    const privateCollectionRef = collection(db, `/artifacts/${appId}/users/${userId}/fichas`);
+                    const publicCollectionRef = collection(db, publicCollectionPath);
+                    const privateDocRef = await addDoc(privateCollectionRef, formData);
+                    await setDoc(doc(publicCollectionRef, privateDocRef.id), formData);
+                    showMessage("Ficha salva com sucesso!");
+                    console.log("Documento salvo com ID:", privateDocRef.id);
+                }
+            } catch (e) {
+                console.error("Erro ao salvar documento: ", e);
+                showMessage("Erro ao salvar a ficha. Por favor, tente novamente.");
+            } finally {
+                hideLoading();
+            }
+        });
+        
+        // Function to download the data as a Word file (.doc)
+        function downloadAsDoc(data) {
+            const now = new Date();
+            const filename = `ficha_licenciamento_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}.doc`;
+            
+            const identificacaoHtml = `
+                <div style="font-family: Arial, sans-serif; margin-bottom: 20px;">
+                    <h2 style="font-size: 24px; color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 5px;">Identificação</h2>
+                    <p><strong>Empreendimento:</strong> ${data.identificacao.empreendimento || 'N/A'}</p>
+                    <p><strong>Responsável:</strong> ${data.identificacao.responsavel || 'N/A'}</p>
+                    <p><strong>Data de preenchimento:</strong> ${data.identificacao.dataPreenchimento || 'N/A'}</p>
+                    <p><strong>Data de atualização prevista:</strong> ${data.identificacao.dataAtualizacao || 'N/A'}</p>
+                    <p><strong>Status consolidado:</strong> ${data.identificacao.statusConsolidado || 'N/A'}</p>
+                    <p><strong>Situação dos estudos:</strong> ${data.identificacao.situacaoEstudos || 'N/A'}</p>
+                    <p><strong>Interações com o órgão licenciador:</strong> ${data.identificacao.interacoesOrgao || 'N/A'}</p>
+                    <p><strong>Pendências técnicas:</strong> ${data.identificacao.pendenciasTecnicas || 'N/A'}</p>
+                    <p><strong>Observações adicionais:</strong> ${data.identificacao.observacoesAdicionais || 'N/A'}</p>
+                </div>
+            `;
+            
+            let riscosHtml = '';
+            if (data.riscos && data.riscos.length > 0) {
+                riscosHtml = `
+                    <div style="font-family: Arial, sans-serif; margin-bottom: 20px;">
+                        <h2 style="font-size: 24px; color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 5px;">Principais Riscos/Bloqueios e Encaminhamentos</h2>
+                        <table border="1" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f3f4f6;">
+                                    <th style="padding: 8px; text-align: left;">Risco/Bloqueio</th>
+                                    <th style="padding: 8px; text-align: left;">Probabilidade</th>
+                                    <th style="padding: 8px; text-align: left;">Impacto</th>
+                                    <th style="padding: 8px; text-align: left;">Encaminhamento</th>
+                                    <th style="padding: 8px; text-align: left;">Justificativa</th>
+                                    <th style="padding: 8px; text-align: left;">Responsável</th>
+                                    <th style="padding: 8px; text-align: left;">Prazo</th>
+                                    <th style="padding: 8px; text-align: left;">Execução</th>
+                                    <th style="padding: 8px; text-align: left;">Indicador de Sucesso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.riscos.map(row => `
+                                    <tr>
+                                        <td style="padding: 8px;">${row[0] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[1] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[2] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[3] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[4] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[5] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[6] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[7] || 'N/A'}</td>
+                                        <td style="padding: 8px;">${row[8] || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            let criticidadeHtml = '';
+            if (data.criticidade && data.criticidade.length > 0) {
+                criticidadeHtml = `
+                    <div style="font-family: Arial, sans-serif; margin-bottom: 20px;">
+                        <h2 style="font-size: 24px; color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 5px;">Checklist de Criticidade</h2>
+                        <table border="1" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f3f4f6;">
+                                    <th style="padding: 8px; text-align: left;">Criticidade</th>
+                                    <th style="padding: 8px; text-align: left;">Situação</th>
+                                    <th style="padding: 8px; text-align: left;">Observações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.criticidade.map(item => `
+                                    <tr>
+                                        <td style="padding: 8px;">${item.criticidade || 'N/A'}</td>
+                                        <td style="padding: 8px;">${item.situacao || 'N/A'}</td>
+                                        <td style="padding: 8px;">${item.observacoes || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            let decisoesHtml = '';
+            if (data.decisoes && data.decisoes.length > 0) {
+                decisoesHtml = `
+                    <div style="font-family: Arial, sans-serif;">
+                        <h2 style="font-size: 24px; color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 5px;">Decisões da Reunião</h2>
+                        <table border="1" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f3f4f6;">
+                                    <th style="padding: 8px; text-align: left;">Decisão tomada</th>
+                                    <th style="padding: 8px; text-align: left;">Responsável</th>
+                                    <th style="padding: 8px; text-align: left;">Prazo</th>
+                                    <th style="padding: 8px; text-align: left;">Próxima Reunião</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.decisoes.map(item => `
+                                    <tr>
+                                        <td style="padding: 8px;">${item.decisao || 'N/A'}</td>
+                                        <td style="padding: 8px;">${item.responsavel || 'N/A'}</td>
+                                        <td style="padding: 8px;">${item.prazo || 'N/A'}</td>
+                                        <td style="padding: 8px;">${item.proximaReuniao || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            // Construct the full HTML content for the Word document
+            const wordContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head><meta charset='utf-8'><title>Ficha de Licenciamento</title></head>
+                    <body>
+                        <h1 style="font-family: Arial, sans-serif; font-size: 28px; color: #1f2937; text-align: center;">Ficha Estratégica - Licenciamento Ambiental</h1>
+                        <p style="font-family: Arial, sans-serif; text-align: center; color: #4b5563;">Gerado em: ${now.toLocaleString('pt-BR')}</p>
+                        ${identificacaoHtml}
+                        ${riscosHtml}
+                        ${criticidadeHtml}
+                        ${decisoesHtml}
+                    </body>
+                </html>
+            `;
+
+            // Create a blob from the HTML content
+            const blob = new Blob([wordContent], { type: 'application/msword' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearForm() {
+            currentDocId = null;
+            formTitle.textContent = "Ficha Estratégica - Licenciamento Ambiental";
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type === 'radio') {
+                    input.checked = false;
+                } else if (input.type === 'date') {
+                    input.value = '';
+                } else {
+                    input.value = '';
+                }
+            });
+            document.querySelectorAll('select').forEach(select => select.value = '');
+            document.querySelectorAll('textarea').forEach(textarea => textarea.value = '');
+            riscosTableBody.innerHTML = '';
+            decisoesTableBody.innerHTML = '';
+        }
+
+        // Clear the form
+        clearFormBtn.addEventListener('click', () => {
+            clearForm();
+            showMessage("Formulário limpo com sucesso!");
+        });
+
+        // Show all records
+        showAllRecordsBtn.addEventListener('click', async () => {
+            allRecordsPanel.classList.remove('hidden');
+            recordsList.innerHTML = '<p class="text-center text-gray-500">Carregando...</p>';
+            
+            try {
+                const q = query(collection(db, publicCollectionPath));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    recordsList.innerHTML = '<p class="text-center text-gray-500">Nenhum cadastro encontrado.</p>';
+                    return;
+                }
+
+                recordsList.innerHTML = ''; // Limpar o conteúdo de carregamento
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const recordId = docSnap.id;
+                    const timestamp = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
+                    const responsavel = data.identificacao?.responsavel || 'N/A';
+                    const empreendimento = data.identificacao?.empreendimento || 'N/A';
+
+                    const recordElement = document.createElement('div');
+                    recordElement.classList.add('record-item', 'mb-6', 'card', 'p-4');
+                    
+                    let riscosHtml = '';
+                    if (data.riscos && Array.isArray(data.riscos) && data.riscos.length > 0) {
+                        const riscosTableHeader = `
+                            <h4 class="font-bold text-lg mt-4 mb-2 text-indigo-700">Principais Riscos/Bloqueios</h4>
+                            <div class="overflow-x-auto">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Risco/Bloqueio</th>
+                                            <th>Probabilidade</th>
+                                            <th>Impacto</th>
+                                            <th>Encaminhamento</th>
+                                            <th>Justificativa</th>
+                                            <th>Responsável</th>
+                                            <th>Prazo</th>
+                                            <th>Execução</th>
+                                            <th>Indicador de Sucesso</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        const riscosTableRows = data.riscos.map(row => `
+                            <tr>
+                                <td>${row[0] || 'N/A'}</td>
+                                <td>${row[1] || 'N/A'}</td>
+                                <td>${row[2] || 'N/A'}</td>
+                                <td>${row[3] || 'N/A'}</td>
+                                <td>${row[4] || 'N/A'}</td>
+                                <td>${row[5] || 'N/A'}</td>
+                                <td>${row[6] || 'N/A'}</td>
+                                <td>${row[7] || 'N/A'}</td>
+                                <td>${row[8] || 'N/A'}</td>
+                            </tr>
+                        `).join('');
+                        const riscosTableFooter = `
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        riscosHtml = riscosTableHeader + riscosTableRows + riscosTableFooter;
+                    }
+
+                    let criticidadeHtml = '';
+                    if (data.criticidade && Array.isArray(data.criticidade) && data.criticidade.length > 0) {
+                        const criticidadeTableHeader = `
+                            <h4 class="font-bold text-lg mt-4 mb-2 text-indigo-700">Checklist de Criticidade</h4>
+                            <div class="overflow-x-auto">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Criticidade</th>
+                                            <th>Situação</th>
+                                            <th>Observações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        const criticidadeTableRows = data.criticidade.map(crit => `
+                            <tr>
+                                <td>${crit.criticidade || 'N/A'}</td>
+                                <td>
+                                    <span class="status-pill status-${crit.situacao.toLowerCase()}">
+                                        ${crit.situacao || 'N/A'}
+                                    </span>
+                                </td>
+                                <td>${crit.observacoes || 'N/A'}</td>
+                            </tr>
+                        `).join('');
+                        const criticidadeTableFooter = `
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        criticidadeHtml = criticidadeTableHeader + criticidadeTableRows + criticidadeTableFooter;
+                    }
+
+                    let decisoesHtml = '';
+                    if (data.decisoes && Array.isArray(data.decisoes) && data.decisoes.length > 0) {
+                        const decisoesTableHeader = `
+                            <h4 class="font-bold text-lg mt-4 mb-2 text-indigo-700">Decisões da Reunião</h4>
+                            <div class="overflow-x-auto">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Decisão</th>
+                                            <th>Responsável</th>
+                                            <th>Prazo</th>
+                                            <th>Próxima Reunião</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        const decisoesTableRows = data.decisoes.map(decisao => `
+                            <tr>
+                                <td>${decisao.decisao || 'N/A'}</td>
+                                <td>${decisao.responsavel || 'N/A'}</td>
+                                <td>${decisao.prazo || 'N/A'}</td>
+                                <td>${decisao.proximaReuniao || 'N/A'}</td>
+                            </tr>
+                        `).join('');
+                        const decisoesTableFooter = `
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        decisoesHtml = decisoesTableHeader + decisoesTableRows + decisoesTableFooter;
+                    }
+                    
+                    const identificacaoHtml = `
+                        <h3 class="font-bold text-xl text-indigo-800">Identificação</h3>
+                        <div class="grid md:grid-cols-2 gap-4 mt-4">
+                            <div><strong>Empreendimento:</strong> ${data.identificacao?.empreendimento || 'N/A'}</div>
+                            <div><strong>Responsável:</strong> ${data.identificacao?.responsavel || 'N/A'}</div>
+                            <div><strong>Data de Preenchimento:</strong> ${data.identificacao?.dataPreenchimento || 'N/A'}</div>
+                            <div><strong>Data de Atualização:</strong> ${data.identificacao?.dataAtualizacao || 'N/A'}</div>
+                        </div>
+                        <div class="mt-4">
+                            <p><strong>Status Consolidado:</strong> ${data.identificacao?.statusConsolidado || 'N/A'}</p>
+                            <p><strong>Situação dos Estudos:</strong> ${data.identificacao?.situacaoEstudos || 'N/A'}</p>
+                            <p><strong>Interações com o Órgão:</strong> ${data.identificacao?.interacoesOrgao || 'N/A'}</p>
+                            <p><strong>Pendências Técnicas:</strong> ${data.identificacao?.pendenciasTecnicas || 'N/A'}</p>
+                            <p><strong>Observações Adicionais:</strong> ${data.identificacao?.observacoesAdicionais || 'N/A'}</p>
+                        </div>
+                    `;
+
+                    recordElement.innerHTML = `
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                            <div class="collapsible-header flex items-center flex-grow cursor-pointer">
+                                <span><span class="font-bold">Ficha de ${empreendimento} - ${responsavel}</span> - Salva em ${timestamp}</span>
+                                <span class="ml-2">&#9660;</span>
+                            </div>
+                            <div class="flex space-x-2 mt-2 md:mt-0">
+                                <button class="btn-secondary edit-record-btn" data-doc-id="${recordId}">Editar</button>
+                                <button class="btn-secondary download-record-btn" data-doc-id="${recordId}">Baixar Ficha</button>
+                                <button class="btn-secondary delete-record-btn" data-doc-id="${recordId}">Excluir</button>
+                            </div>
+                        </div>
+                        <div class="collapsible-content-wrapper">
+                            <div class="collapsible-content">
+                                ${identificacaoHtml}
+                                ${riscosHtml}
+                                ${criticidadeHtml}
+                                ${decisoesHtml}
+                            </div>
+                        </div>
+                    `;
+                    recordsList.appendChild(recordElement);
+                });
+
+                // Add event listeners for the new collapsible, edit, download and delete elements
+                document.querySelectorAll('.collapsible-header').forEach(header => {
+                    header.addEventListener('click', (e) => {
+                        const recordItem = header.closest('.record-item');
+                        const contentWrapper = recordItem.querySelector('.collapsible-content-wrapper');
+                        const arrowSpan = header.querySelector('span:last-child');
+                        
+                        if (contentWrapper.style.maxHeight) {
+                            contentWrapper.style.maxHeight = null;
+                            arrowSpan.innerHTML = '&#9660;'; // down arrow
+                        } else {
+                            contentWrapper.style.maxHeight = contentWrapper.scrollHeight + 'px';
+                            arrowSpan.innerHTML = '&#9650;'; // up arrow
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.edit-record-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.getAttribute('data-doc-id');
+                        showLoading();
+                        try {
+                            const docRef = doc(db, publicCollectionPath, docId);
+                            const docSnap = await getDoc(docRef);
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                loadFormData({ ...data, docId });
+                                allRecordsPanel.classList.add('hidden');
+                                showMessage("Ficha carregada para edição!");
+                            } else {
+                                showMessage("Erro: Ficha não encontrada.");
+                            }
+                        } catch(e) {
+                            console.error("Erro ao carregar documento para edição:", e);
+                            showMessage("Erro ao carregar a ficha. Por favor, tente novamente.");
+                        } finally {
+                            hideLoading();
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.download-record-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.getAttribute('data-doc-id');
+                        showLoading();
+                        try {
+                            const docRef = doc(db, publicCollectionPath, docId);
+                            const docSnap = await getDoc(docRef);
+
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                downloadAsDoc(data);
+                                showMessage("Ficha baixada com sucesso!");
+                            } else {
+                                showMessage("Erro: Ficha não encontrada.");
+                            }
+                        } catch (e) {
+                            console.error("Erro ao baixar documento: ", e);
+                            showMessage("Erro ao baixar a ficha. Por favor, tente novamente.");
+                        } finally {
+                            hideLoading();
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.delete-record-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.getAttribute('data-doc-id');
+                        showLoading();
+                        try {
+                            const publicDocRef = doc(db, publicCollectionPath, docId);
+                            const privateDocRef = doc(db, `/artifacts/${appId}/users/${userId}/fichas`, docId);
+                            await deleteDoc(publicDocRef);
+                            await deleteDoc(privateDocRef);
+                            e.target.closest('.record-item').remove();
+                            showMessage("Ficha deletada com sucesso.");
+                            console.log("Documento deletado com ID:", docId);
+                        } catch (e) {
+                            console.error("Erro ao deletar documento: ", e);
+                            showMessage("Erro ao deletar a ficha. Por favor, tente novamente.");
+                        } finally {
+                            hideLoading();
+                        }
+                    });
+                });
+
+            } catch (e) {
+                console.error("Erro ao carregar todos os documentos: ", e);
+                recordsList.innerHTML = '<p class="text-center text-red-500">Erro ao carregar os dados. Por favor, tente novamente.</p>';
+            }
+        });
+
+        // Close all records panel
+        closeAllRecordsBtn.addEventListener('click', () => {
+            allRecordsPanel.classList.add('hidden');
+        });
+
+        // Initial setup
+        setupAuthAndFirestore();
+    </script>
+</body>
+</html>
